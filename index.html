@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+    type="text/javascript"></script>
+
+<head>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ponepklyoch - 无现语字典 | asdawej</title>
+    <style type="text/css">
+        a:link {
+            text-decoration: none;
+            color: #FF359B
+        }
+
+        a:active {
+            text-decoration: underline;
+            color: #FF359B
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #FF359B
+        }
+
+        a:visited {
+            text-decoration: none;
+            color: #FF359B
+        }
+
+        body {
+            background: url("bgimg.jpg") no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -o-background-size: cover;
+            background-size: 100% 100%;
+            color: blueviolet;
+        }
+    </style><!--链接样式、文字颜色与背景图片-->
+</head>
+
+<body>
+    <div id="container">
+        <!--眉部-->
+        <div id="header" style="width:1500px; float:left; color:#FF9966">
+            <h1>Ponepklyoch - 无现语字典</h1>
+        </div>
+
+        <!--中部-->
+        <div style="width:1500px; float:left">
+            <!--左区块-->
+            <div style="width:350px; float:left">
+                <div style="background-color:rgba(192, 192, 192, 0.5); padding:20px">
+                    <img src="/profile_img.jpg" alt="asdawej"></img>
+                    <p><b>bilibili:</b><a href="https://space.bilibili.com/350704566"
+                            target="_blank">asdawej_bilibili</a></p>
+                    <p><b>Zhihu:</b><a href="https://www.zhihu.com/people/asdawej/" target="_blank">asdawej_Zhihu</a>
+                    </p>
+                    <p><b>Github:</b><a href="https://github.com/asdawej/" target="_blank">asdawej_Github</a></p>
+                </div>
+            </div>
+
+            <!--中间区块-->
+            <div style="background-color:rgba(255, 255, 255, 0.5); width:800px; float:left">
+                <div id="content" style="padding:20px">
+                    <p>请输入首字母：</p>
+                    <input type="text" id="capital_input" autocomplete="off">
+                    <p>然后输入你需要查询的单词或者它的一部分：</p>
+                    <input type="text" id="query_input" autocomplete="off">
+                    <p>最后，按下按钮完成搜索：</p>
+                    <button type="button" onclick="Query()">开始查询</button>
+                </div>
+            </div>
+
+            <script>
+                async function Query() {
+                    const div = document.getElementById("content");
+                    div.querySelectorAll('p.dynamic').forEach(p => p.remove());
+                    const c = document.getElementById("capital_input").value;
+                    const key = document.getElementById("query_input").value;
+                    for await (var { cur_key, meanings, examples } of SearchWord(c, key)) {
+                        div.appendChild(document.createElement("hr"));
+                        CreatePara(div, `单词：${cur_key}`, true);
+                        CreatePara(div, "释义：", true);
+                        meanings.forEach(s => CreatePara(div, `- ${s}`));
+                        CreatePara(div, "例句：", true);
+                        examples.forEach(s => CreatePara(div, `- ${s}`));
+                    }
+                }
+
+                function CreatePara(div, s, bold) {
+                    var p = document.createElement("p");
+                    p.className = "dynamic";
+                    var n = document.createTextNode(s);
+                    if (bold) {
+                        var b = document.createElement("b");
+                        b.appendChild(n);
+                        p.appendChild(b);
+                    }
+                    else
+                        p.appendChild(n);
+                    div.appendChild(p)
+                }
+
+                async function* SearchWord(c, key) {
+                    var flag = false;
+                    var cur_key = "";
+                    var meanings = [];
+                    var examples = [];
+                    for await (var line of GetDataFile(c)) {
+                        if (line.startswith("WORD=") && line.includes(key)) {
+                            flag = true;
+                            cur_key = line.slice(5);
+                        }
+                        else if (flag) {
+                            if (line.startswith("EXAMPLES=")) {
+                                examples = line.slice(9).eval();
+                                yield { cur_key, meanings, examples };
+                                flag = false;
+                            }
+                            else
+                                meanings = line.slice(5).eval();
+                        }
+                    }
+                }
+
+                async function* GetDataFile(c) {
+                    const response = await fetch(`data/${c}.pnkc`);
+                    if (!response.ok)
+                        throw new Error("数据加载失败！");
+                    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+                    let buffer = '';
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done)
+                            break;
+                        buffer += value;
+                        let lineEndIndex;
+                        while ((lineEndIndex = buffer.indexOf('\n')) >= 0) {
+                            const line = buffer.slice(0, lineEndIndex).trim();
+                            buffer = buffer.slice(lineEndIndex + 1);
+                            if (line) {
+                                console.log(line);
+                                yield line;
+                            }
+                        }
+                    }
+                    if (buffer.trim())
+                        yield buffer.trim();
+                }
+            </script>
+        </div>
+    </div>
+</body>
+
+</html>
