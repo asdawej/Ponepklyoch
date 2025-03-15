@@ -109,12 +109,12 @@
                     var meanings = [];
                     var examples = [];
                     for await (var line of GetDataFile(c)) {
-                        if (line.startswith("WORD=") && line.includes(key)) {
+                        if (line.startsWith("WORD=") && line.includes(key)) {
                             flag = true;
                             cur_key = line.slice(5);
                         }
                         else if (flag) {
-                            if (line.startswith("EXAMPLES=")) {
+                            if (line.startsWith("EXAMPLES=")) {
                                 examples = line.slice(9).eval();
                                 yield { cur_key, meanings, examples };
                                 flag = false;
