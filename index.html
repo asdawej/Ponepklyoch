@@ -77,10 +77,13 @@
                 async function Query() {
                     const div = document.getElementById("content");
                     div.querySelectorAll('p.dynamic').forEach(p => p.remove());
+                    div.querySelectorAll('hr.dynamic').forEach(p => p.remove());
                     const c = document.getElementById("capital_input").value;
                     const key = document.getElementById("query_input").value;
                     for await (var { cur_key, meanings, examples } of SearchWord(c, key)) {
-                        div.appendChild(document.createElement("hr"));
+                        var hr = document.createElement("hr");
+                        hr.className = "dynamic";
+                        div.appendChild(hr);
                         CreatePara(div, `单词：${cur_key}`, true);
                         CreatePara(div, "释义：", true);
                         meanings.forEach(s => CreatePara(div, `- ${s}`));
