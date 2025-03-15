@@ -115,12 +115,12 @@
                         }
                         else if (flag) {
                             if (line.startsWith("EXAMPLES=")) {
-                                examples = line.slice(9).eval();
+                                examples = eval(line.slice(9));
                                 yield { cur_key, meanings, examples };
                                 flag = false;
                             }
                             else
-                                meanings = line.slice(5).eval();
+                                meanings = eval(line.slice(9));
                         }
                     }
                 }
