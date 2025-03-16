@@ -258,6 +258,7 @@ class Data:
                         cur_key = Word.key_from_line(line)
                     elif line.startswith('EXAMPLES='):
                         ret[c][cur_key] = Word.word_from_lines(word_lines)
+                        word_lines = []
         return ret
 
 

@@ -77,12 +77,21 @@
             </div>
 
             <script>
+                function Capital(key) {
+                    var c = key[0].toLowerCase();
+                    if (c >= 'a' && c <= 'z')
+                        return c;
+                    return '#';
+                }
+
                 async function Query() {
                     const div = document.getElementById("content");
                     div.querySelectorAll('p.dynamic').forEach(p => p.remove());
                     div.querySelectorAll('hr.dynamic').forEach(p => p.remove());
-                    const c = document.getElementById("capital_input").value;
-                    const key = document.getElementById("query_input").value;
+                    var c = document.getElementById("capital_input").value;
+                    var key = document.getElementById("query_input").value;
+                    if (c.length == 0)
+                        c = Capital(key);
                     for await (var { cur_key, meanings, examples } of SearchWord(c, key)) {
                         var hr = document.createElement("hr");
                         hr.className = "dynamic";
